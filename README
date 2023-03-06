@@ -1,0 +1,23 @@
+How to set IP:
+static variables in code
+- IP
+- Subnet
+- Destination IP
+
+In the future:
+- Small screen and encoder
+    - Few pins needed
+    - Additional settings available like
+        - Curve
+        - IP, Subnet, Destination IP
+        - Pedal mode
+
+Using OpenSoundControl as protocol
+
+Notes:
+/noteon/{key} i {velocity}
+/noteoff/{key} i {velocity}
+
+ControlChanges
+/cc/{id} i value
+
