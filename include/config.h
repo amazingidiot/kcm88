@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-static const uint32_t TIME_DEBOUNCE = 3000;
+static const uint32_t TIME_DEBOUNCE = 1500;
 
 #endif

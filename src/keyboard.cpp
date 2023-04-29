@@ -162,19 +162,43 @@ void loopKeyboard(uint32_t current_time, uint32_t last_time)
 
     for (int key = 0; key < KEY_COUNT; key++) {
         // Debounce and process keys
-        // TODO: Switch debounce condition with trigger state condition
-        if (debounce(keys[key].debounce_0, current_time)) {
-            // Once debounce time is over. reset debounce time to 0 to prevent key hangup on timer rollover
-            keys[key].debounce_0 = 0;
+        if (keys[key].trigger_1 && !keys[key].prev_trigger_1 && keys[key].state == GOING_DOWN) {
+            if (keys[key].debounce_1 == 0) {
+                // trigger_1 is pressed, key is now down
+                keys[key].prev_trigger_1 = true;
+                keys[key].debounce_1 = current_time;
+                keys[key].state = DOWN;
 
-            if (keys[key].trigger_0 && !keys[key].prev_trigger_0 && keys[key].state == UP) {
+                saveTimeDifference(key, NOTEON_TIME_MIN, NOTEON_TIME_MAX, current_time, last_time);
+
+                float velocity = calculateMidiNoteOnVelocity(keys[key].time);
+
+                sendNoteOn(key + KEY_OFFSET, velocity);
+            }
+        }
+        if (!keys[key].trigger_1 && keys[key].prev_trigger_1 && keys[key].state == DOWN) {
+            if (keys[key].debounce_1 == 0) {
+                // trigger_1 is released, key is going up
+                keys[key].prev_trigger_1 = false;
+                keys[key].debounce_1 = current_time;
+                keys[key].state = GOING_UP;
+
+                keys[key].time = current_time;
+            }
+        }
+
+        if (keys[key].trigger_0 && !keys[key].prev_trigger_0 && keys[key].state == UP) {
+            if (keys[key].debounce_0 == 0) {
                 // trigger_0 is pressed, key is going down
                 keys[key].prev_trigger_0 = true;
                 keys[key].debounce_0 = current_time;
                 keys[key].state = GOING_DOWN;
 
                 keys[key].time = current_time;
-            } else if (!keys[key].trigger_0 && keys[key].prev_trigger_0 && keys[key].state == GOING_UP) {
+            }
+        }
+        if (!keys[key].trigger_0 && keys[key].prev_trigger_0 && keys[key].state == GOING_UP) {
+            if (keys[key].debounce_0 == 0) {
                 // trigger_0 is released, key is now up
                 keys[key].prev_trigger_0 = false;
                 keys[key].debounce_0 = current_time;
@@ -189,29 +213,11 @@ void loopKeyboard(uint32_t current_time, uint32_t last_time)
             }
         }
 
-        if (debounce(keys[key].debounce_1, current_time)) {
+        if (keys[key].debounce_0 > 0 && debounce(keys[key].debounce_0, current_time)) {
+            keys[key].debounce_0 = 0;
+        }
+        if (keys[key].debounce_1 > 0 && debounce(keys[key].debounce_1, current_time)) {
             keys[key].debounce_1 = 0;
-
-            if (keys[key].trigger_1 && !keys[key].prev_trigger_1 && keys[key].state == GOING_DOWN) {
-                // trigger_1 is pressed, key is now down
-                keys[key].prev_trigger_1 = true;
-                keys[key].debounce_1 = current_time;
-                keys[key].state = DOWN;
-
-                saveTimeDifference(key, NOTEON_TIME_MIN, NOTEON_TIME_MAX, current_time, last_time);
-
-                float velocity = calculateMidiNoteOnVelocity(keys[key].time);
-
-                sendNoteOn(key + KEY_OFFSET, velocity);
-
-            } else if (!keys[key].trigger_1 && keys[key].prev_trigger_1 && keys[key].state == DOWN) {
-                // trigger_1 is released, key is going up
-                keys[key].prev_trigger_1 = false;
-                keys[key].debounce_1 = current_time;
-                keys[key].state = GOING_UP;
-
-                keys[key].time = current_time;
-            }
         }
     }
 }

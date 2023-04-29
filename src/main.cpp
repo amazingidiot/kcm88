@@ -4,7 +4,7 @@
 #include "net_data.h"
 #include "pedals.h"
 
-static const uint32_t time_between_loops = 500;
+static const uint32_t time_between_loops = 600;
 static uint32_t last_loop_time = 0;
 
 // store current time every loop for velocity calculations
