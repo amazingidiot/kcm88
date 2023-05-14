@@ -54,32 +54,6 @@ void loopPedals(uint32_t current_time, uint32_t last_time)
         sendPedalDamper(false);
     }
 
-    if (!pedal_digital_ring && pedal_digital_ring_prev) {
-        // Pedal was pressed
-        if (pedal_digital_ring_debounce == 0) {
-            pedal_digital_ring_debounce = current_time;
-
-            sendPedalDamper(true);
-        }
-        if (debounce(pedal_digital_ring_debounce, current_time)) {
-            // Debounce time over, reset counter
-            pedal_digital_ring_debounce = 0;
-        }
-    }
-
-    if (pedal_digital_ring && !pedal_digital_ring_prev) {
-        // Pedal was released
-        if (pedal_digital_ring_debounce == 0) {
-            pedal_digital_ring_debounce = current_time;
-
-            sendPedalDamper(false);
-        }
-        if (debounce(pedal_digital_ring_debounce, current_time)) {
-            // Debounce time over, reset counter
-            pedal_digital_ring_debounce = 0;
-        }
-    }
-
     pedal_digital_ring_prev = pedal_digital_ring;
     pedal_digital_tip_prev = pedal_digital_tip;
 }
