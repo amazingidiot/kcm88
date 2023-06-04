@@ -53,7 +53,7 @@ void sendNoteOn(uint8_t note, float velocity)
 {
     parser.init("/noteon");
     parser.addInt(note);
-    parser.addInt((int32_t)(126.0f * velocity) + 1);
+    parser.addFloat(velocity);
 
     sendData();
 }
@@ -62,7 +62,7 @@ void sendNoteOff(uint8_t note, float velocity)
 {
     parser.init("/noteoff");
     parser.addInt(note);
-    parser.addInt((int32_t)(126.0f * velocity) + 1);
+    parser.addFloat(velocity);
 
     sendData();
 }

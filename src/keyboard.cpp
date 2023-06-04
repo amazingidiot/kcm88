@@ -9,7 +9,7 @@ static const uint8_t KEY_OFFSET = 21;
 
 // microseconds between trigger_0 and trigger_1 for maximum velocity
 // increase value to reach maximum velocity easier
-static const uint32_t NOTEON_TIME_MIN = 4000;
+static const uint32_t NOTEON_TIME_MIN = 3000;
 
 // microseconds between trigger_0 and trigger_1 for minimum velocity
 // decrease value to reach minimum velocity faster
@@ -19,7 +19,7 @@ static const uint32_t NOTEON_TIME_MAX = 120000;
 static const float NOTEON_TIME_RANGE = (float)(NOTEON_TIME_MAX - NOTEON_TIME_MIN);
 
 // Curve for the noteon velocity. Change only the value in the middle. pow(1 - 0.65f, 3)
-static const float NOTEON_VELOCITY_BIAS = 0.042875f;
+static const float NOTEON_VELOCITY_BIAS = 0.1f;
 
 // microseconds between trigger_0 and trigger_1 for maximum velocity
 // increase value to reach maximum velocity easier
@@ -33,7 +33,7 @@ static const uint32_t NOTEOFF_TIME_MAX = 80000;
 static const float NOTEOFF_TIME_RANGE = (float)(NOTEOFF_TIME_MAX - NOTEOFF_TIME_MIN);
 
 // delay after digitalWrite() during scan_matrix()
-static const uint32_t TIME_DELAY_SCANMATRIX = 5;
+static const uint32_t TIME_DELAY_SCANMATRIX = 8;
 
 static const uint32_t MIDI_CHANNEL = 1;
 // Number of keys
@@ -112,7 +112,7 @@ float calculateMidiNoteOnVelocity(uint32_t time)
 {
     float x = (NOTEON_TIME_RANGE - (float)time) / NOTEON_TIME_RANGE;
 
-    float midi_velocity = x * NOTEON_VELOCITY_BIAS / (x * NOTEON_VELOCITY_BIAS - x + 1);
+    float midi_velocity = x * NOTEON_VELOCITY_BIAS / (x * NOTEON_VELOCITY_BIAS - x + 1.0f);
 
     return midi_velocity;
 }
@@ -137,18 +137,18 @@ void processMatrix()
             uint8_t currentKey = block * 8 + T_LINE;
 
             // Read lower matrix
-            keys[currentKey].trigger_0 = digitalReadFast(BR_LOW[block]);
+            keys[currentKey].trigger_0 = digitalRead(BR_LOW[block]);
             // Read BR-Line
-            keys[currentKey].trigger_1 = digitalReadFast(MK_LOW[block]);
+            keys[currentKey].trigger_1 = digitalRead(MK_LOW[block]);
         }
         for (uint8_t block = 0; block < COUNT_MKBR_HIGH; block++) {
             // Calculate current key
             uint8_t currentKey = block * 8 + T_LINE + 40;
 
             // Read upper matrix
-            keys[currentKey].trigger_0 = digitalReadFast(BR_HIGH[block]);
+            keys[currentKey].trigger_0 = digitalRead(BR_HIGH[block]);
             // Read BR-Line
-            keys[currentKey].trigger_1 = digitalReadFast(MK_HIGH[block]);
+            keys[currentKey].trigger_1 = digitalRead(MK_HIGH[block]);
         }
 
         digitalWrite(T_LOW[T_LINE], LOW);
@@ -189,7 +189,7 @@ void loopKeyboard(uint32_t current_time, uint32_t last_time)
 
         if (keys[key].trigger_0 && !keys[key].prev_trigger_0 && keys[key].state == UP) {
             if (keys[key].debounce_0 == 0) {
-                // trigger_0 is pressed, key is going down
+                // trigger_1 is pressed, key is going down
                 keys[key].prev_trigger_0 = true;
                 keys[key].debounce_0 = current_time;
                 keys[key].state = GOING_DOWN;
@@ -213,15 +213,29 @@ void loopKeyboard(uint32_t current_time, uint32_t last_time)
             }
         }
 
-	// TODO: Manage key presses that are not going entirely down
-	// TODO: Manage key presses that are not going entirely up
-
-
         if (keys[key].debounce_0 > 0 && debounce(keys[key].debounce_0, current_time)) {
             keys[key].debounce_0 = 0;
         }
         if (keys[key].debounce_1 > 0 && debounce(keys[key].debounce_1, current_time)) {
             keys[key].debounce_1 = 0;
+        }
+
+        // Handling keys that go back up after the first trigger
+        if (!keys[key].trigger_0 && keys[key].state == GOING_DOWN) {
+            if (keys[key].debounce_0 == 0) {
+                // trigger_0 is released, key is back up
+                keys[key].prev_trigger_0 = false;
+                keys[key].state = UP;
+            }
+        }
+
+        // Handling keys that go back down after releasing second trigger
+        if (keys[key].trigger_1 && keys[key].state == GOING_UP) {
+            if (keys[key].debounce_1 == 0) {
+                // trigger_1 is pressed, key is back down
+                keys[key].prev_trigger_1 = true;
+                keys[key].state = DOWN;
+            }
         }
     }
 }
