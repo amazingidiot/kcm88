@@ -1,10 +1,11 @@
-#ifndef NET_DATA_H
-#define NET_DATA_H
+#pragma once
 
 #include <Arduino.h>
 
-void setupNetData();
-void loopNetData();
+int setupNet();
+void loopNet();
+
+bool isActive();
 
 void sendNoteOn(uint8_t note, float velocity);
 void sendNoteOff(uint8_t note, float velocity);
@@ -12,5 +13,3 @@ void sendNoteOff(uint8_t note, float velocity);
 void sendPedalDamper(bool pressed);
 
 void sendPedalExpression(float value);
-
-#endif

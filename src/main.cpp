@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
+#include "net.h"
 #include "keyboard.h"
-#include "net_data.h"
 #include "pedals.h"
 
-static const uint32_t time_between_loops = 1000;
+static const uint32_t time_between_loops = 500;
 static uint32_t last_loop_time = 0;
 
 // store current time every loop for velocity calculations
@@ -14,14 +14,14 @@ static uint32_t last_time = 0;
 
 void setup()
 {
-    setupNetData();
+    setupNet();
     setupKeyboard();
     setupPedals();
 }
 
 void loop()
 {
-    loopNetData();
+    loopNet();
 
     current_time = micros();
 
