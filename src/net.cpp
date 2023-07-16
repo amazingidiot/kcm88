@@ -63,19 +63,21 @@ int setupNet()
         return -1;
     }
 
-    if (!net::MDNS.begin("kcm88")) {
+    net::Ethernet.setHostname(NET_HOSTNAME);
+
+    if (!net::MDNS.begin(NET_HOSTNAME)) {
         // Could not start MDNS service
         return -1;
     }
 
-    net::MDNS.addService("_osc", "_tcp", 8000);
+    net::MDNS.addService(NET_SERVICENAME, "_osc", "_tcp", 8000);
 
     return 0;
 }
 
 void loopNet()
 {
-	net::EthernetClient client = server.accept();
+    net::EthernetClient client = server.accept();
 
     if (client) {
         client.setNoDelay(true);
@@ -87,6 +89,8 @@ void sendData()
 {
     for (auto client : clients) {
         client.client.writeFully(parser.getMessageBuf(), parser.getMessageSize());
+
+        client.client.flush();
     }
 }
 

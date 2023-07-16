@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#include "net.h"
 #include "keyboard.h"
+#include "net.h"
 #include "pedals.h"
 
 static const uint32_t time_between_loops = 500;
