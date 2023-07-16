@@ -189,7 +189,7 @@ void loopKeyboard(uint32_t current_time, uint32_t last_time)
 
         if (keys[key].trigger_0 && !keys[key].prev_trigger_0 && keys[key].state == UP) {
             if (keys[key].debounce_0 == 0) {
-                // trigger_1 is pressed, key is going down
+                // trigger_0 is pressed, key is going down
                 keys[key].prev_trigger_0 = true;
                 keys[key].debounce_0 = current_time;
                 keys[key].state = GOING_DOWN;
